@@ -15,9 +15,10 @@
 #
 # Usage:
 # 1. Save this script to a file, e.g., `photoprism-users.sh`.
-# 2. Make the script executable: `chmod +x photoprism-users.sh`
-# 3. Ensure you have the necessary privileges to interact with Docker. If not, run the script as root or use sudo.
-# 4. Run the script: `./photoprism-users.sh` or `sudo ./photoprism-users.sh`
+# 2. Modify DOCKER_CONTAINER_NAME if your docker container name is not photoprism
+# 3. Make the script executable: `chmod +x photoprism-users.sh`
+# 4. Ensure you have the necessary privileges to interact with Docker. If not, run the script as root or use sudo.
+# 5. Run the script: `./photoprism-users.sh` or `sudo ./photoprism-users.sh`
 #
 # Important:
 # - Always ensure you have backups and understand the implications of
@@ -26,6 +27,11 @@
 #   interact with Docker and PhotoPrism. If in doubt, run the script as root 
 #   or with sudo.
 # ---------------------------------------------------------------
+
+
+# Set the name of your PhotoPrism Docker container here. Default is "photoprism".
+DOCKER_CONTAINER_NAME="photoprism"
+
 
 echo "---------------------------------------------------------------"
 echo "PhotoPrism User Management Script"
@@ -36,11 +42,27 @@ echo "- Run with proper privileges or use sudo for Docker interactions."
 echo "---------------------------------------------------------------"
 echo ""
 
+# Loading animation as docker can take some time to respond
+spinner() {
+    local pid=$1
+    local delay=0.75
+    local spinstr='|/-\'
+    echo -n "Processing"
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
 while true; do
     echo "PhotoPrism User Management Menu:"
     echo "1. Add a new user"
     echo "2. List existing user accounts"
-    echo "3. Display user account information"
+    echo "3. Display account information of a specific user"
     echo "4. Modify an existing user account"
     echo "5. Remove a user account"
     echo "6. Exit"
@@ -89,22 +111,25 @@ while true; do
             UPLOAD_PATH_FLAG="-u $UPLOAD_PATH"
 
             # Construct the full command
-            CMD="docker exec photoprism photoprism users add -n \"$NAME\" -m \"$EMAIL\" -p \"$PASSWORD\" -r \"$ROLE\" $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG"
-            eval $CMD
+            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users add -n \"$NAME\" -m \"$EMAIL\" -p \"$PASSWORD\" -r \"$ROLE\" $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG"
+			$CMD & spinner $!
+			echo ""
             ;;
 
         2)
             # List existing user accounts
             CMD="docker exec photoprism photoprism users ls"
-            eval $CMD
+			$CMD & spinner $!
+			echo ""
             ;;
 
         3)
             # Display user account information
             echo "Enter a username to display information for:"
             read USERNAME
-            CMD="docker exec photoprism photoprism users show $USERNAME"
-            eval $CMD
+            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users show $USERNAME"
+			$CMD & spinner $!
+			echo ""
             ;;
 
         4)
@@ -173,8 +198,9 @@ while true; do
             fi
 
             # Construct the full command
-            CMD="docker exec photoprism photoprism users mod $NAME_FLAG $EMAIL_FLAG $PASSWORD_FLAG $ROLE_FLAG $SUPERADMIN_FLAG $WEBDAV_FLAG $LOGIN_FLAG $UPLOAD_PATH_FLAG $USERNAME"
-			eval $CMD
+            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users mod $NAME_FLAG $EMAIL_FLAG $PASSWORD_FLAG $ROLE_FLAG $SUPERADMIN_FLAG $WEBDAV_FLAG $LOGIN_FLAG $UPLOAD_PATH_FLAG $USERNAME"
+			$CMD & spinner $!
+			echo ""
             ;;
 
         5)
@@ -186,8 +212,9 @@ while true; do
             read CONFIRM_USERNAME
 
             if [ "$USERNAME" = "$CONFIRM_USERNAME" ]; then
-                CMD="docker exec photoprism photoprism users rm $USERNAME"
-                eval $CMD
+                CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users rm $USERNAME"
+				$CMD & spinner $!
+				echo ""
             else
                 echo "Usernames do not match. User not removed."
             fi
