@@ -72,14 +72,17 @@ while true; do
     case $CHOICE in
         1)
             # Add a new user
-            echo "Enter a display name for the interface:"
-            read NAME
-
-            echo "Enter a unique email address of the user:"
-            read EMAIL
-
+            echo "Enter a username, used when logging in"
+            read USERNAME
+			
             echo "Enter a password for authentication:"
             read PASSWORD
+			
+            echo "Enter a display name, shown in the webui:"
+            read NAME
+
+            echo "Enter an email address of the user:"
+            read EMAIL
 
             echo "Should the user be an admin? (y/N, 'N' or empty = 'user'):"
             read IS_ADMIN
@@ -104,23 +107,23 @@ while true; do
             # Prompt for sub-directory until a valid value is entered
             while [ -z "$UPLOAD_PATH" ]; do
                 echo "Enter a new sub-directory for uploads without /:		# subdirectory of the 'Originals' folder set in PhotoPrism config"
-				echo ""
                 read UPLOAD_PATH
             done
 
             UPLOAD_PATH_FLAG="-u $UPLOAD_PATH"
 
             # Construct the full command
-            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users add -n \"$NAME\" -m \"$EMAIL\" -p \"$PASSWORD\" -r \"$ROLE\" $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG"
-			$CMD & spinner $!
-			echo ""
+            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users add -n \"$NAME\" -m \"$EMAIL\" -p \"$PASSWORD\" -r \"$ROLE\" $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG $USERNAME"
+            echo $CMD
+            $CMD & spinner $!
+            echo ""
             ;;
 
         2)
             # List existing user accounts
             CMD="docker exec photoprism photoprism users ls"
-			$CMD & spinner $!
-			echo ""
+            $CMD & spinner $!
+            echo ""
             ;;
 
         3)
@@ -128,8 +131,9 @@ while true; do
             echo "Enter a username to display information for:"
             read USERNAME
             CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users show $USERNAME"
-			$CMD & spinner $!
-			echo ""
+            echo $CMD
+            $CMD & spinner $!
+            echo ""
             ;;
 
         4)
@@ -199,8 +203,9 @@ while true; do
 
             # Construct the full command
             CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users mod $NAME_FLAG $EMAIL_FLAG $PASSWORD_FLAG $ROLE_FLAG $SUPERADMIN_FLAG $WEBDAV_FLAG $LOGIN_FLAG $UPLOAD_PATH_FLAG $USERNAME"
-			$CMD & spinner $!
-			echo ""
+            echo $CMD
+            $CMD & spinner $!
+            echo ""
             ;;
 
         5)
@@ -213,8 +218,9 @@ while true; do
 
             if [ "$USERNAME" = "$CONFIRM_USERNAME" ]; then
                 CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users rm $USERNAME"
-				$CMD & spinner $!
-				echo ""
+                echo $CMD
+                $CMD & spinner $!
+                echo ""
             else
                 echo "Usernames do not match. User not removed."
             fi
