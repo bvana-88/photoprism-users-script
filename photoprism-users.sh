@@ -72,8 +72,8 @@ while true; do
     case $CHOICE in
         1)
             # Add a new user
-            echo "Enter a username, used when logging in"
-            read USERNAME
+			echo "Enter a username, used when logging in"
+			read USERNAME
 			
             echo "Enter a password for authentication:"
             read PASSWORD
@@ -101,29 +101,35 @@ while true; do
                 fi
             fi
 
-            # WebDAV is always allowed
-            WEBDAV_FLAG="-w"
-
-            # Prompt for sub-directory until a valid value is entered
-            while [ -z "$UPLOAD_PATH" ]; do
-                echo "Enter a new sub-directory for uploads without /:		# subdirectory of the 'Originals' folder set in PhotoPrism config"
-                read UPLOAD_PATH
-            done
-
-            UPLOAD_PATH_FLAG="-u $UPLOAD_PATH"
+			echo "Should the user be allowed to sync files via WebDAV? (Y/n):"
+			read WEBDAV
+			WEBDAV_FLAG=""
+			if [ "$WEBDAV" = "n" ] || [ "$WEBDAV" = "N" ]; then
+				WEBDAV_FLAG=""
+			else
+				WEBDAV_FLAG="-w"
+			fi
+			
+			echo "Enter a new sub-directory for uploads without / (Leave empty to use Originals dir):" # subdirectory of the 'Originals' folder set in PhotoPrism config
+			read UPLOAD_PATH
+			if [ -z "$UPLOAD_PATH" ]; then
+					UPLOAD_PATH_FLAG=""
+				else
+					UPLOAD_PATH_FLAG="-u $UPLOAD_PATH"
+			fi
 
             # Construct the full command
             CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users add -n \"$NAME\" -m \"$EMAIL\" -p \"$PASSWORD\" -r \"$ROLE\" $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG $USERNAME"
-            echo $CMD
-            $CMD & spinner $!
-            echo ""
+			echo $CMD
+			$CMD & spinner $!
+			echo ""
             ;;
 
         2)
             # List existing user accounts
             CMD="docker exec photoprism photoprism users ls"
-            $CMD & spinner $!
-            echo ""
+			$CMD & spinner $!
+			echo ""
             ;;
 
         3)
@@ -131,9 +137,9 @@ while true; do
             echo "Enter a username to display information for:"
             read USERNAME
             CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users show $USERNAME"
-            echo $CMD
-            $CMD & spinner $!
-            echo ""
+			echo $CMD
+			$CMD & spinner $!
+			echo ""
             ;;
 
         4)
@@ -177,16 +183,14 @@ while true; do
 				ROLE_FLAG="-r user"
 			fi
 
-			# Prompt for WebDAV
-			echo "Should the user be allowed to sync files via WebDAV? (y/N, press Enter to skip):"
+			echo "Should the user be allowed to sync files via WebDAV? (y/n, press Enter to skip):"
 			read WEBDAV
 			WEBDAV_FLAG=""
 			if [ "$WEBDAV" = "y" ] || [ "$WEBDAV" = "Y" ]; then
 				WEBDAV_FLAG="-w"
 			fi
 
-			# Prompt for login
-			echo "Should the user be allowed to login on the web interface? (y/N, press Enter to skip):"
+			echo "Should the user be allowed to login on the web interface? (y/n, press Enter to skip):"
 			read LOGIN
 			LOGIN_FLAG=""
 			if [ "$LOGIN" = "n" ] || [ "$LOGIN" = "N" ]; then
@@ -203,9 +207,9 @@ while true; do
 
             # Construct the full command
             CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users mod $NAME_FLAG $EMAIL_FLAG $PASSWORD_FLAG $ROLE_FLAG $SUPERADMIN_FLAG $WEBDAV_FLAG $LOGIN_FLAG $UPLOAD_PATH_FLAG $USERNAME"
-            echo $CMD
-            $CMD & spinner $!
-            echo ""
+			echo $CMD
+			$CMD & spinner $!
+			echo ""
             ;;
 
         5)
@@ -218,9 +222,9 @@ while true; do
 
             if [ "$USERNAME" = "$CONFIRM_USERNAME" ]; then
                 CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users rm $USERNAME"
-                echo $CMD
-                $CMD & spinner $!
-                echo ""
+				echo $CMD
+				$CMD & spinner $!
+				echo ""
             else
                 echo "Usernames do not match. User not removed."
             fi
