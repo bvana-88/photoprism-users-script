@@ -119,7 +119,7 @@ while true; do
 			fi
 
             # Construct the full command
-            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users add -n \"$NAME\" -m \"$EMAIL\" -p \"$PASSWORD\" -r \"$ROLE\" $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG $USERNAME"
+            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users add -n $NAME -m $EMAIL -p $PASSWORD -r $ROLE $SUPERADMIN_FLAG $WEBDAV_FLAG $UPLOAD_PATH_FLAG $USERNAME"
 			echo $CMD
 			$CMD & spinner $!
 			echo ""
