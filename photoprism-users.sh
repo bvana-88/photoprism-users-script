@@ -127,7 +127,7 @@ while true; do
 
         2)
             # List existing user accounts
-            CMD="docker exec photoprism photoprism users ls"
+            CMD="docker exec $DOCKER_CONTAINER_NAME photoprism users ls"
 			$CMD & spinner $!
 			echo ""
             ;;
